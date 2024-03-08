@@ -1,10 +1,16 @@
+// ignore_for_file: use_build_context_synchronously
+import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
+
 import 'package:first/button_widget.dart';
+import 'package:first/db/preferences_service.dart';
 import 'package:first/pages/signin.dart';
 import 'package:first/textformfield.dart';
 import 'package:flutter/material.dart';
 
 class SignUp extends StatefulWidget {
-  const SignUp({super.key});
+  const SignUp(this.preferencesService, {super.key});
+
+  final PreferencesService preferencesService;
 
   @override
   State<SignUp> createState() => _SignUpState();
@@ -12,6 +18,10 @@ class SignUp extends StatefulWidget {
 
 class _SignUpState extends State<SignUp> {
   final TextEditingController _pass = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _phoneNumberController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,14 +29,6 @@ class _SignUpState extends State<SignUp> {
           title: const Text("Sign up"),
           centerTitle: true,
           backgroundColor: Colors.white,
-          leading: IconButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              icon: const Icon(
-                Icons.arrow_back_ios,
-                color: Colors.black,
-              )),
         ),
         body: Padding(
           padding: const EdgeInsets.all(8),
@@ -43,7 +45,19 @@ class _SignUpState extends State<SignUp> {
               ),
               const SizedBox(height: 30),
               TextFieldWidget(
+                controller: _usernameController,
+                validator: (String? value) {
+                  if (value!.isEmpty) {
+                    return "Please fill the field";
+                  }
+                  return null;
+                },
+                hintText: "Username",
+              ),
+              const SizedBox(height: 20),
+              TextFieldWidget(
                   hintText: "Enter email",
+                  controller: _emailController,
                   validator: (String? value) {
                     if (value!.isEmpty ||
                         !RegExp(r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$')
@@ -52,6 +66,19 @@ class _SignUpState extends State<SignUp> {
                     }
                     return null;
                   }),
+              const SizedBox(height: 20),
+              TextFieldWidget(
+                controller: _phoneNumberController,
+                validator: (String? value) {
+                  if (!RegExp(r'^\+[0-9]+$').hasMatch(value!)) {
+                    return "Please enter valid Phone Number";
+                  }
+                  return null;
+                },
+                keyboardType: TextInputType.phone,
+                hintText: "Phone number",
+                inputFormatters: [MaskedInputFormatter('+###########')],
+              ),
               const SizedBox(height: 20),
               TextFieldWidget(
                 controller: _pass,
@@ -76,7 +103,10 @@ class _SignUpState extends State<SignUp> {
                 obscureText: true,
               ),
               const SizedBox(height: 30),
-              const ButtonWidget(text: "Sign up"),
+              ButtonWidget(
+                text: "Sign up",
+                onTap: _signUp,
+              ),
               const SizedBox(height: 20),
               const Text("or",
                   textAlign: TextAlign.center,
@@ -102,7 +132,7 @@ class _SignUpState extends State<SignUp> {
                 ),
                 TextButton(
                     onPressed: () {
-                      Navigator.of(context).pushNamed('/');
+                      Navigator.of(context).pushNamed('/sign-in');
                     },
                     child: const Text(
                       "Sign in",
@@ -116,5 +146,18 @@ class _SignUpState extends State<SignUp> {
             ],
           )),
         ));
+  }
+
+  Future<void> _signUp() async {
+    try {
+      await widget.preferencesService.setEmail(_emailController.text);
+      await widget.preferencesService.setPassword(_pass.text);
+      await widget.preferencesService.setUsername(_usernameController.text);
+      await widget.preferencesService
+          .setphoneNumber(_phoneNumberController.text);
+      Navigator.of(context).pushNamed('/profile');
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 }

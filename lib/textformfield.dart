@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart';
 
 class TextFieldWidget extends StatefulWidget {
   const TextFieldWidget(
       {this.controller,
+      this.inputFormatters,
+      this.keyboardType,
       this.validator,
       this.hintText,
       this.onChanged,
@@ -15,6 +17,8 @@ class TextFieldWidget extends StatefulWidget {
   final String? hintText;
   final TextEditingController? controller;
   final bool obscureText;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   State<TextFieldWidget> createState() => _TextFieldWidgetState();
@@ -27,11 +31,14 @@ class _TextFieldWidgetState extends State<TextFieldWidget> {
   Widget build(BuildContext context) {
     return TextFormField(
       key: _globalKey,
+      keyboardType: widget.keyboardType,
       onChanged: (value) {
         if (_globalKey.currentState?.validate() == true) {
           widget.onChanged?.call(value);
         }
       },
+      inputFormatters: widget.inputFormatters,
+      // MaskedInputFormatter('(###) ###-####')],
       controller: widget.controller,
       validator: widget.validator,
       style: const TextStyle(fontSize: 20),

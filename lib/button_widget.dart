@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class ButtonWidget extends StatelessWidget {
-  const ButtonWidget({required this.text, super.key});
+  const ButtonWidget({required this.text, this.onTap, super.key});
+
+  final void Function()? onTap;
 
   // final GlobalKey<FormState> _globalKey;
   final String text;
@@ -9,9 +11,7 @@ class ButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.of(context).pushNamed('/profile');
-      },
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.fromLTRB(120, 10, 120, 10),
         decoration: const BoxDecoration(color: Color(0xFF20C3AF)),

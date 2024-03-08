@@ -1,16 +1,22 @@
+import 'package:first/db/preferences_service.dart';
 import 'package:flutter/material.dart';
 import '../button_widget.dart';
 import '../textformfield.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class Signin extends StatefulWidget {
-  const Signin({super.key});
+  const Signin(this.preferencesService, {super.key});
+
+  final PreferencesService preferencesService;
+
   @override
   State<Signin> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<Signin> {
   final GlobalKey<FormState> _globalKey = GlobalKey<FormState>();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +44,7 @@ class _MyAppState extends State<Signin> {
                 ),
                 const SizedBox(height: 30.0),
                 TextFieldWidget(
+                  controller: _usernameController,
                   validator: (p0) {
                     if (p0!.isEmpty) {
                       return "Please enter username";
@@ -48,6 +55,7 @@ class _MyAppState extends State<Signin> {
                 ),
                 const SizedBox(height: 20.0),
                 TextFieldWidget(
+                  controller: _passwordController,
                   validator: (String? value) {
                     if (value!.isEmpty || value.length <= 8) {
                       return "Please enter more 8 character";
@@ -76,8 +84,9 @@ class _MyAppState extends State<Signin> {
                   ],
                 ),
                 const SizedBox(height: 20.0),
-                const ButtonWidget(
+                ButtonWidget(
                   text: "Login",
+                  onTap: _signIn,
                 ),
                 const SizedBox(height: 20.0),
                 const Text('or',
@@ -94,7 +103,7 @@ class _MyAppState extends State<Signin> {
                   const Text("Don't have an account?"),
                   TextButton(
                     onPressed: () {
-                      Navigator.of(context).pushNamed('/sign-up');
+                      Navigator.of(context).pushNamed('/');
                     },
                     child: const Text(
                       "Sign up",
@@ -110,6 +119,18 @@ class _MyAppState extends State<Signin> {
             ),
           ),
         ));
+  }
+
+  void _signIn() {
+    final String? username = widget.preferencesService.getUsername();
+    final String? password = widget.preferencesService.getPassword();
+    if (username == _usernameController.text &&
+        password == _passwordController.text) {
+      Navigator.of(context).pushNamed('/profile');
+    } else {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Invalid credentials')));
+    }
   }
 }
 
